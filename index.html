@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>BattleYard</title>
+	<title>Battlespace</title>
 
 <style type="text/css">
 	body{
@@ -39,7 +39,7 @@
 		height:18px;
 		position:absolute;
 	}
-	#explode{
+	.explode{
 		background: url('1942.gif');
 		background-position: -115px -30px;
 		width:28px;
@@ -55,12 +55,17 @@
 		font-size:30px;
 		font-family: Arial;
 	}
-	#game_over{
+	.gameover{
+		width: 300px;
+		height: 100px;
+		text-align: center;
+		font-size: 30pt;
+		font-weight: bold;
+		padding-top: 20px;
 		position: absolute;
-		top: 200px;
-		left: 300px;
+		top: 100px;
+		left: 250px;
 		color: yellow;
-		font-size: 32px;
 	}
 	dl{
 		position:fixed;
@@ -81,10 +86,10 @@
 		<div id='enemies'></div>
 		<div id='bullets'></div>
 		<div id="enemyBullets"></div>
-		<div id="explosion"></div>
-		<div id="gamover"></div>
+		<div id="explodes"></div>
+		<div id="gameover"</div>
 		<div id='score'>Score: 0</div>
-		<h1>Welcome to Battlefield!!</h1>
+		<h1>Welcome to Battlespace!!</h1>
 	<dl>
 		<dd>Shoot- Space Bar</dd>
 		<dd>Move Around - Arrow Keys</dd>
@@ -104,11 +109,31 @@
 	var bullets = [];
 
 	var enemyBullet =[];
+	var explode = [];
 
 
 	function displayHero(){
 		document.getElementById('hero').style['top'] = hero.y + "px";
 		document.getElementById('hero').style['left'] = hero.x + "px";
+	}
+
+	function displayEnemy(){
+		while(enemies.length < 8){
+			enemies.push({x:Math.random()*580,y:Math.random()*580});
+		}
+		var output = '';
+		for(var i = 0; i<enemies.length; i++){
+			output += "<div class='enemy1' style='top:"+enemies[i].y+"px; left:"+enemies[i].x+"px;'></div>";
+		}
+		document.getElementById('enemies').innerHTML = output;
+	}
+
+	function displayBullets(){
+		var output = '';
+		for(var i = 0; i<bullets.length; i++){
+			output += "<div class='bullet' style='top:"+bullets[i].y+"px; left:"+bullets[i].x+"px;'></div>";
+		}
+		document.getElementById('bullets').innerHTML = output;
 	}
 
 	function moveEnemies(){
@@ -127,6 +152,29 @@
 		}
 		for(var j = 0; j< enemyBullet.length; j++){
 			moveEnemyBullet(j);
+		}
+		// for(i=0; i<enemies.length; i++){
+		// 	if(Math.abs(hero.x-Math.floor(enemies[i].x))<15 && Math.abs(hero.y-Math.floor(enemies[i].y))<3){
+		// 		score -= 50;
+		// 		document.getElementById('score').innerHTML = score; --- This is for Minus points when enemy hits hero!
+		// 	}
+		// }
+	}
+
+	function moveBullets(index) {
+		setTimeout(function(){
+			if(bullets[index]!= null){
+				bullets[index].y -= 5;
+				if(bullets[index].y > 0){
+					moveBullets(index);
+				}
+				detectCollision(index);
+				displayBullets();
+			}
+		},40);
+		if(bullets[index].y === 5){
+			bullets.splice(index,1);
+			displayBullets();
 		}
 	}
 
@@ -148,64 +196,49 @@
 				detectEnemyCollision(index);
 				displayEnemyBullets();
 		}
-	},500);
+	},300);
 		if(enemyBullet[index].y >= 580){
-			enemyBullet.splice(index,3);
+			enemyBullet.splice(index,1);
 			displayEnemyBullets();
 		}
-	}
-
-	function moveBullets(index) {
-		setTimeout(function(){
-			if(bullets[index]!= null){
-				bullets[index].y -= 5;
-				if(bullets[index].y > 0){
-					moveBullets(index);
-				}
-				detectCollision(index);
-				displayBullets();
-		}
-	},40);
-		if(bullets[index].y === 5){
-			bullets.splice(index,1);
-			displayBullets();
-		}
-	}
-
-	function displayEnemy(){
-		while(enemies.length < 7){
-					enemies.push({x:Math.random()*580,y:0});
-		}
-		var output = '';
-		for(var i = 0; i<enemies.length; i++){
-			output += "<div class='enemy1' style='top:"+enemies[i].y+"px; left:"+enemies[i].x+"px;'></div>";
-		}
-		document.getElementById('enemies').innerHTML = output;
-	}
-
-	function displayBullets(){
-		var output = '';
-		for(var i = 0; i<bullets.length; i++){
-			output += "<div class='bullet' style='top:"+bullets[i].y+"px; left:"+bullets[i].x+"px;'></div>";
-			}
-			document.getElementById('bullets').innerHTML = output;
 	}
 
 	function displayScore(){
 		document.getElementById('score').innerHTML = score;
 	}
 
+
+	function displayGameOver(){
+		document.onkeypress = function(e){
+			if(e.keyCode == 13){
+				document.location.reload();
+			}
+		}
+		document.getElementById('gameover').innerHTML= "<div class='gameover'> Game over!! Press Enter to Restart</div>";
+	}
+
 	function detectEnemyCollision(bIndex){
 		for(var j = 0; j< enemies.length; j++){
 			if(Math.abs(hero.x - enemyBullet[bIndex].x) < 10 && enemyBullet[bIndex].y-hero.y < 10){
 				enemyBullet.splice(bIndex,1);
-				displayEnemyBullets();
-				// enemies.splice(j,1);
-				// displayEnemy();
-				break;
-				// enemies[j].y = 601;
-				// moveEnemies();
-				//enemies[j].x = Math.random()*600;
+					displayEnemyBullets();
+					// enemies.splice(j,1);
+					// displayEnemy();
+					break;
+					// enemies[j].y = 601;
+					// moveEnemies();
+					//enemies[j].x = Math.random()*600;
+			}
+		}
+		for(var i=enemies.length-1; i >= 0; i--){
+			if(Math.abs(hero.x - enemies[i].x - 6) < 10 && Math.abs(hero.y - enemies[i].y + 10) < 10){
+				displayGameOver();
+				setTimeout(moveEnemies);
+			}
+		}
+		for(var i=enemyBullet.length-1; i >=0; i--){
+			if(Math.abs(hero.x - enemyBullet[i].x - 6) < 16 && Math.abs(hero.y - enemyBullet[i].y +10) < 16){
+				displayGameOver();
 			}
 		}
 	}
@@ -214,8 +247,8 @@
 			for(var j = 0; j< enemies.length; j++){
 				if(Math.abs(enemies[j].x - bullets[bIndex].x) < 10 && bullets[bIndex].y-enemies[j].y < 10){
 					score += 10;
-					var output = "<div id='explode' style='top:"+enemies[j].y+"px; left:"+enemies[j].x+"px;'></div>";
-					document.getElementById('explosion').innerHTML = output;
+					// var output = "<div id='explode' style='top:"+enemies[j].y+"px; left:"+enemies[j].x+"px;'></div>";
+					// document.getElementById('explosion').innerHTML = output;
 					bullets.splice(bIndex,1);
 					displayBullets();
 					enemies.splice(j,1);
@@ -226,14 +259,20 @@
 			}
 	}
 
-	function displayGameOver(){
-		document.getElementById('gameover').innerHTML = "<div class='gameover'> Game OVER!!!</div>";
+	function displayExplosion(){
+		var output ='';
+		for(var i =0; i < explode.length; i++){
+			output = "<div class='explode' style='top:"+enemies[i].y+"px; left:"+enemies[i].x+"px;'></div>";
+		}
+		document.getElementById('explodes').innerHTML = output;
 	}
 
 displayEnemy();
+displayExplosion();
 setInterval(moveEnemies,70);
 
 		document.onkeydown = function(e){
+
 				if(e.keyCode == 37){
 					hero.x -= 10;
 				} else if (e.keyCode == 39){
