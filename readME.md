@@ -1,1 +1,1 @@
-This is a battlefield game made from HTML,CSS and JavaScript
+This is an a arcade battlefield game made from HTML,CSS and JavaScript
